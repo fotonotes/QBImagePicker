@@ -475,10 +475,8 @@ static CGSize CGSizeScale(CGSize size, CGFloat scale) {
     // Video indicator
     if (asset.mediaType == PHAssetMediaTypeVideo) {
         cell.videoIndicatorView.hidden = NO;
-        
-        NSInteger minutes = (NSInteger)(asset.duration / 60.0);
-        NSInteger seconds = (NSInteger)ceil(asset.duration - 60.0 * (double)minutes);
-        cell.videoIndicatorView.timeLabel.text = [NSString stringWithFormat:@"%02ld:%02ld", (long)minutes, (long)seconds];
+
+        cell.videoIndicatorView.timeLabel.text = [self formattedDurationFromTimeInterval:asset.duration];
         
         if (asset.mediaSubtypes & PHAssetMediaSubtypeVideoHighFrameRate) {
             cell.videoIndicatorView.videoIcon.hidden = YES;
@@ -499,6 +497,35 @@ static CGSize CGSizeScale(CGSize size, CGFloat scale) {
     }
     
     return cell;
+}
+
+- (NSDateComponentsFormatter *)durationFormatterForTimeInterval:(NSTimeInterval)interval {
+    NSDateComponentsFormatter *formatter = [[NSDateComponentsFormatter alloc] init];
+    formatter.unitsStyle = NSDateComponentsFormatterUnitsStylePositional;
+
+    if (interval >= 3600) { // 1 hour = 3600 seconds
+        formatter.allowedUnits = NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond;
+    } else {
+        formatter.allowedUnits = NSCalendarUnitMinute | NSCalendarUnitSecond;
+    }
+
+    formatter.zeroFormattingBehavior = NSDateComponentsFormatterZeroFormattingBehaviorPad;
+    return formatter;
+}
+
+- (NSString *)formattedDurationFromTimeInterval:(NSTimeInterval)interval {
+    // Round the interval to the nearest second
+    interval = round(interval);
+    
+    NSDateComponentsFormatter *formatter = [self durationFormatterForTimeInterval:interval];
+    NSString *formattedString = [formatter stringFromTimeInterval:interval];
+
+    // Remove leading zero for minutes
+    if ([formattedString hasPrefix:@"0"]) {
+        formattedString = [formattedString substringFromIndex:1];
+    }
+
+    return formattedString;
 }
 
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
