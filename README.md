@@ -1,8 +1,10 @@
-# QBImagePicker
-
 # NOTE: 
 We have a new Swift library called **SCMediaPicker** inspired by the QBImagePicker. 
 https://github.com/fotonotes/SCMediaPicker
+
+-----
+
+# QBImagePicker
 
 A clone of UIImagePickerController with multiple selection support.
 
